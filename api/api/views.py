@@ -1,7 +1,6 @@
 import json
 import os
 
-
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
@@ -61,9 +60,6 @@ class BlockUrl(APIView):
         permissions.AllowAny  # Or anon users can't register
     ]
 
-    # queryset = Sites.objects.all()
-    # serializer_class = SitesSerializer
-
     def check_if_profile_proxy_config_exists(self):
         http_proxy = 'export http_proxy=http://192.168.1.186:3128'
         https_proxy = 'export https_proxy=http://192.168.1.186:3128'
@@ -84,13 +80,11 @@ class BlockUrl(APIView):
             print("An error has occurred opening the file ")
             print(ValueError)
 
-    def check_if_profile_squid_config_exists(self):
+    def check_if_profile_squid_config_exists(self, word_to_block):
         maximum_object_size = 'maximum_object_size 120 MB'
         minimum_object_size = 'minimum_object_size 0 KB'
         cache_mem = 'cache_mem 256 MB'
         http_access_localhost = 'http_access allow localhost'
-
-        word_to_block = 'globo'  # This word will come from React.
 
         proxy_ip = 'acl liberarip src 192.168.1.186'
         name_to_block = 'acl {} url_regex -i {}'.format(word_to_block, word_to_block)
@@ -132,27 +126,36 @@ class BlockUrl(APIView):
             backup = backup.rstrip("\n")
             f.write(backup)
             f.close()
+
+            # Sites.objects.all()
+            # serializer_class = SitesSerializer
+
         except ValueError:
             print("An error has occurred opening the file ")
             print(ValueError)
 
         return Response("O site " + word_to_block + "foi adiconado a blacklist com sucesso.")
 
-    def get(self, request):
-        # json_response = "www.youtube.com.br"
-        # site_to_block = "acl block {}".format(json_response)
-        print("get")
+    def post(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        word_to_block = str(data.__getitem__('site'))
+
         os.system("sudo chmod 777 /etc/squid")
         os.system("sudo chmod 777 /etc/profile")
-        # os.system("sudo chmod 777 /etc/squid/squid.conf")
+        os.system("sudo chmod 777 /etc/squid/squid.conf")
         # os.system("sudo chmod 777 /etc/profile")
 
         self.check_if_profile_proxy_config_exists()
-        self.check_if_profile_squid_config_exists()
+        self.check_if_profile_squid_config_exists(word_to_block)
+
+        try:
+            obj = Sites.objects.create(site=word_to_block)
+            obj.save()
+        except ValueError:
+            return ValueError
 
         # os.system("sudo systemctl reload squid.service")
         os.system("sudo systemctl reload squid")
-        # os.system("sudo squid -k reconfigure")
 
         return Response("O site foi adiconado a blacklist com sucesso.")
 
@@ -161,7 +164,7 @@ class BlockUrl(APIView):
 @authentication_classes([])
 class RemoveUrl(APIView):
     def remove_url_blocked_squid(self):
-        bad_words = "globo"
+        bad_words = "fema"
         import re
         import fileinput
 
