@@ -1,1 +1,7 @@
 https://phoenixnap.com/kb/setup-install-squid-proxy-server-ubuntu
+
+sudo chmod 777 /etc/squid
+sudo chmod 777 /etc/profile
+
+http://127.0.0.1:8000/api/removeurl/
+http://127.0.0.1:8000/api/blockurl/
