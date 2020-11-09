@@ -20,8 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3190bad4-0a8b-4e19-a616-bc40d889e579" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/admin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/components/Headers/Clock.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/components/Headers/Clock.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/components/Headers/Spinner.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/components/Headers/Spinner.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sqlite3.db" beforeDir="false" afterPath="$PROJECT_DIR$/sqlite3.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,9 +73,20 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="743" y="282" width="428" height="486" key="FileChooserDialogImpl" timestamp="1604738441573">
+    <state x="743" y="282" width="428" height="486" key="FileChooserDialogImpl" timestamp="1604761273049">
       <screen x="0" y="0" width="1920" height="1048" />
     </state>
-    <state x="743" y="282" width="428" height="486" key="FileChooserDialogImpl/0.0.1920.1048@0.0.1920.1048" timestamp="1604738441573" />
+    <state x="743" y="282" width="428" height="486" key="FileChooserDialogImpl/0.0.1920.1048@0.0.1920.1048" timestamp="1604761273049" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/api/views.py</url>
+          <line>259</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

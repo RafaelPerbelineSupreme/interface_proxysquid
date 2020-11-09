@@ -14,5 +14,9 @@ urlpatterns = [
     path('', include(router.urls)),
     path('removeurl/', views.RemoveUrl.as_view()),
     path('blockurl/', views.BlockUrl.as_view()),
+    path('whatismyip/', views.WhatIsMyIp.as_view()),
+    path('configuresquid/', views.ConfigureSquid.as_view()),
+    path('installsquid/', views.InstallSquid.as_view()),
+    path('uninstallsquid/', views.UninstallSquid.as_view())
 ]
 

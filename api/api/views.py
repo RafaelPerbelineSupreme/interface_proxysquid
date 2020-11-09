@@ -1,6 +1,7 @@
 import json
 import os
 
+from django.http import JsonResponse
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
@@ -80,14 +81,14 @@ class BlockUrl(APIView):
             print("An error has occurred opening the file ")
             print(ValueError)
 
-    def check_if_profile_squid_config_exists(self, word_to_block):
+    def check_if_profile_squid_config_exists(self, word_to_block, dias_semana):
         maximum_object_size = 'maximum_object_size 120 MB'
         minimum_object_size = 'minimum_object_size 0 KB'
         cache_mem = 'cache_mem 256 MB'
         http_access_localhost = 'http_access allow localhost'
 
         proxy_ip = 'acl liberarip src 192.168.1.186'
-        name_to_block = 'acl {} url_regex -i {}'.format(word_to_block, word_to_block)
+        name_to_block = 'acl {} url_regex -i {} time {}'.format(word_to_block, word_to_block, dias_semana.replace(',', ''))
         http_access_deny = 'http_access deny {}'.format(word_to_block)
         liberarip = 'http_access allow liberarip'
         deny_all = 'http_access deny all'
@@ -136,9 +137,14 @@ class BlockUrl(APIView):
 
         return Response("O site " + word_to_block + "foi adiconado a blacklist com sucesso.")
 
+    def get(self, request, *args, **kwargs):
+        queryset = Sites.objects.all().values()
+        return JsonResponse({"site": list(queryset)})
+
     def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
         word_to_block = str(data.__getitem__('site'))
+        dias_semana = str(data.__getitem__('semana'))
 
         os.system("sudo chmod 777 /etc/squid")
         os.system("sudo chmod 777 /etc/profile")
@@ -146,25 +152,97 @@ class BlockUrl(APIView):
         # os.system("sudo chmod 777 /etc/profile")
 
         self.check_if_profile_proxy_config_exists()
-        self.check_if_profile_squid_config_exists(word_to_block)
+        self.check_if_profile_squid_config_exists(word_to_block, dias_semana)
 
         try:
             obj = Sites.objects.create(site=word_to_block)
             obj.save()
+            os.system("sudo systemctl reload squid")
         except ValueError:
             return ValueError
 
         # os.system("sudo systemctl reload squid.service")
         os.system("sudo systemctl reload squid")
-
         return Response("O site foi adiconado a blacklist com sucesso.")
 
 
 @permission_classes((AllowAny,))
 @authentication_classes([])
+class WhatIsMyIp(APIView):
+    def get(self, request):
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+
+        return Response(ip)
+
+@permission_classes((AllowAny,))
+@authentication_classes([])
+class InstallSquid(APIView):
+    def get(self, request):
+        try:
+            os.system("sudo apt install squid -y")
+            return Response("O Proxy Squid Server foi instalado com sucesso!")
+        except ValueError:
+            return Response(ValueError)
+
+@permission_classes((AllowAny,))
+@authentication_classes([])
+class UninstallSquid(APIView):
+    def get(self, request):
+        try:
+            os.system("sudo apt purge squid -y")
+            sites = Sites.objects.all()
+            sites.delete()
+
+            return Response("O Proxy Squid Server foi desinstalado com sucesso!")
+        except ValueError:
+            return Response(ValueError)
+
+@permission_classes((AllowAny,))
+@authentication_classes([])
+class ConfigureSquid(APIView):
+    def get(self, request):
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+
+        http_proxy = 'export http_proxy=http://{}:3128'.format(ip)
+        https_proxy = 'export https_proxy=http://{}:3128'.format(ip)
+
+        try:
+            with open("/etc/profile", "r") as f:
+                etc_profile_read = f.read()
+                print(etc_profile_read)
+        except ValueError:
+            print(ValueError)
+        try:
+            if not http_proxy in etc_profile_read:
+                open("/etc/profile", "a+").write("\n" + http_proxy)
+            if not https_proxy in etc_profile_read:
+                open("/etc/profile", "a+").write("\n" + https_proxy)
+            # open("/etc/profile", "a+").close()
+            os.system("sudo systemctl reload squid")
+        except ValueError:
+            print("An error has occurred opening the file ")
+            return Response(ValueError)
+
+        return Response("SQUID foi configurado com sucesso!");
+
+
+
+
+@permission_classes((AllowAny,))
+@authentication_classes([])
 class RemoveUrl(APIView):
-    def remove_url_blocked_squid(self):
-        bad_words = "fema"
+    def remove_url_blocked_squid(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        bad_words = str(data.__getitem__('site'))
+
         import re
         import fileinput
 
@@ -178,9 +256,15 @@ class RemoveUrl(APIView):
         except ValueError:
             return Response(ValueError)
 
-    def get(self, request):
+    def delete(self, request):
         os.system("sudo chmod 777 /etc/squid")
-        self.remove_url_blocked_squid()
+        self.remove_url_blocked_squid(request)
         os.system("sudo systemctl reload squid")
+
+        data = json.loads(request.body.decode('utf-8'))
+        id = int(data.__getitem__('id'))
+
+        sites = Sites.objects.get(id=id)
+        sites.delete()
 
         return Response("O site foi removido da blacklist com sucesso.")
